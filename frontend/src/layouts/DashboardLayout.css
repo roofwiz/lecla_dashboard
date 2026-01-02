@@ -1,0 +1,28 @@
+.layout-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--color-bg-main);
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 260px;
+    /* Width of Sidebar */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.content-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+}
+
+.content-area {
+    padding: var(--spacing-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}

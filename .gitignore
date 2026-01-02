@@ -3,6 +3,10 @@ backend/venv/
 backend/__pycache__/
 *.pyc
 .env
+# Ignore Google API credentials
+client_secret_OAuth.json
+backend/client_secret.json
+backend/token.pickle
 
 # Logs
 *.log
