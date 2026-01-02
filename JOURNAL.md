@@ -22,6 +22,17 @@ Successfully initialized the project, implemented the full-stack architecture, a
   - Created a responsive Grid layout with Glassmorphism effects.
   - Added widgets for Active Jobs, Projects, and Upcoming Schedule.
 
+### Technical Notes & Gotchas (Things to Remember)
+1.  **Git Security**: 
+    -   NEVER commit `client_secret.json`, `token.pickle`, or `.env` files.
+    -   If a push is rejected by "pre-receive hook", check if you are accidentally committing secrets.
+    -   Ensure sensitive files are listed in `.gitignore`.
+2.  **Google OAuth**: 
+    -   First-time run requires executing `python backend/google_auth_flow.py` locally to generate `token.pickle`.
+    -   Test Users must be added in Google Cloud Console while the app is in "Testing" mode.
+3.  **Environment Variables**:
+    -   Always restarting the backend (`Ctrl+C` then `uvicorn...`) is required to load changes from `.env`.
+
 ### Next Steps (Pick Up Here)
 1.  **Google Maps**: Debug `GOOGLE_API_KEY` to enable the map widget.
 2.  **Dedicated Pages**: Create full-view pages for:
