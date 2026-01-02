@@ -1,7 +1,12 @@
-import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 
 const Sidebar = () => {
+    const location = useLocation();
+
+    // Helper to check active class
+    const isActive = (path) => location.pathname === path ? 'active' : '';
+
     return (
         <aside className="sidebar">
             <div className="logo-container">
@@ -10,10 +15,14 @@ const Sidebar = () => {
             </div>
 
             <nav className="nav-menu">
-                <a href="#" className="nav-item active">
+                <Link to="/" className={`nav-item ${isActive('/')}`}>
                     <span className="icon">🏠</span>
                     <span className="label">Dashboard</span>
-                </a>
+                </Link>
+                <Link to="/reports" className={`nav-item ${isActive('/reports')}`}>
+                    <span className="icon">📊</span>
+                    <span className="label">Sales Reports</span>
+                </Link>
                 <a href="#" className="nav-item">
                     <span className="icon">🔨</span>
                     <span className="label">Jobs</span>

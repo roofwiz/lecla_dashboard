@@ -13,6 +13,8 @@ class Settings:
     JOB_NIMBUS_TOKEN: str = os.getenv("JOB_NIMBUS_API_TOKEN", "")
     COMPANY_CAM_TOKEN: str = os.getenv("COMPANY_CAM_TOKEN", "")
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+    GOOGLE_SHEET_ID: str = os.getenv("GOOGLE_SHEET_ID", "")
+    
     GOOGLE_CLIENT_SECRET: Path = BASE_DIR / "client_secret.json"
     GOOGLE_TOKEN_PICKLE: Path = BASE_DIR / "token.pickle"
 

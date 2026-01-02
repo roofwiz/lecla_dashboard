@@ -5,7 +5,11 @@ from google.auth.transport.requests import Request
 from pathlib import Path
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+SCOPES = [
+    'https://www.googleapis.com/auth/calendar.readonly',
+    'https://www.googleapis.com/auth/spreadsheets.readonly',
+    'https://www.googleapis.com/auth/drive.readonly'
+]
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -33,6 +37,17 @@ def main():
 
             flow = InstalledAppFlow.from_client_secrets_file(
                 str(secret_path), SCOPES)
+            
+            print("\n" + "="*60)
+            print("🚀  GOOGLE AUTHENTICATION STARTED")
+            print("="*60)
+            print("1. A link will appear below (start with https://...)")
+            print("2. COPY that link.")
+            print("3. PASTE it into your WEB BROWSER (Chrome/Edge).")
+            print("4. DO NOT PASTE IT HERE IN THE TERMINAL!")
+            print("5. Log in, then come back here.")
+            print("="*60 + "\n")
+
             creds = flow.run_local_server(port=0)
             
         # Save the credentials for the next run
