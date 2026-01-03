@@ -40,3 +40,29 @@ Successfully initialized the project, implemented the full-stack architecture, a
     -   **/photos**: Gallery view for Company Cam projects.
     -   **/schedule**: Full calendar view.
 3.  **Deployment**: Prepare for eventual deployment (likely Vercel/Render or similar).
+
+## [2026-01-02] - Sales Audit & Local Database
+### Summary
+Addressed data reliability issues with JobNimbus sales figures. Shifted from live API scraping (which was slow and hitting pagination limits) to a robust **Local Database (SQLite)** architecture. Successfully implemented a synchronization engine and generated audit reports flagging significant revenue discrepancies.
+
+### Details
+- **Backend Architecture Update**:
+  - **Local Database**: Implemented `backend/lecla.db` (SQLite) to serve as the single source of truth for dashboard data.
+  - **Smart Sync Service**: Created `backend/sync_service.py` which:
+    - Fetches all Budgets and Estimates.
+    - Intelligently identifies and fetches only the relevant linked Jobs.
+    - **Fixes**: Worked around JobNimbus API broken pagination for `/jobs` by using targeted lookups.
+  - **CLI Tools**: Added `sync_db.bat` for one-click database updates.
+- **Sales Data Audit**:
+  - Created `backend/report_from_db.py` to analyze financial integrity.
+  - **Findings**: Flagged **949** instances where "Budget Revenue" did not match "Job Total" (discrepancy > $1.00).
+  - **Report**: Generated `backend/discrepancy_report_db.csv` for user review.
+
+### Technical Notes
+- **API Limits**: The JobNimbus API `/jobs` endpoint `skip` parameter is unreliable for deep paging (>5000 items). The new "Smart Sync" strategy avoids this by fetching specific IDs gathered from Budgets.
+- **Performance**: Dashboard reporting is now instant (querying local DB) rather than waiting minutes for API calls.
+
+### Next Steps
+1.  **Frontend Integration**: Connect the React dashboard to read from the local database endpoints instead of proxying live requests.
+2.  **Discrepancy UI**: Create a "Data Quality" view in the dashboard to visualize these budget vs. job mismatches.
+

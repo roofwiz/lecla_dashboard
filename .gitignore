@@ -11,6 +11,14 @@ backend/token.pickle
 # Logs
 *.log
 
+# Scripts and Debug Tools
+backend/debug_*.py
+backend/scan_*.py
+backend/test_*.py
+backend/analyze_*.py
+backend/temp_*.py
+backend/examine_*.py
+
 # OS
 .DS_Store
 Thumbs.db

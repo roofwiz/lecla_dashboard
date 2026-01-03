@@ -5,6 +5,7 @@ from backend.app.routers import google, reports, calendar
 from backend.app.services.jobnimbus import jn_client
 import os
 import pickle
+from datetime import datetime
 
 app = FastAPI(title="Lecla Dashboard API")
 
@@ -49,7 +50,11 @@ def read_root():
 @app.get("/api/jobs")
 async def proxy_jobs(limit: int = 50):
     try:
-        results = await jn_client.get_jobs_simple(limit=limit)
+        # Optimization: Only fetch jobs from the last 6 months for the dashboard
+        six_months_ago = int(datetime.now().timestamp() - (180 * 24 * 60 * 60))
+        filters = {"date_created_gt": six_months_ago}
+        
+        results = await jn_client.get_jobs_simple(limit=limit, extra_params=filters)
         return results
     except Exception as e:
         print(f"Proxy Error: {e}")

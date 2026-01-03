@@ -10,8 +10,10 @@ function Reports() {
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
+            console.log("Fetching report for year:", selectedYear);
             try {
                 const data = await fetchSalesReports(selectedYear);
+                console.log("Report Data Received:", data);
                 setReportData(data || { results: [], total_revenue: 0, total_leads: 0, total_closed: 0, goal: 0, year: selectedYear });
             } catch (err) {
                 console.error("Failed to load reports", err);
