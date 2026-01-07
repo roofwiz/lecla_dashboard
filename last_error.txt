@@ -1,0 +1,231 @@
+﻿backend\venv\Scripts\pytho
+n : C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\vertexai\generative_mo
+dels\_generative_models.py
+:433: UserWarning: This 
+feature is deprecated as 
+of June 24, 2025 and will 
+be removed on June 24, 
+2026. For details, see htt
+ps://cloud.google.com/vert
+ex-ai/generative-ai/docs/d
+eprecations/genai-vertexai
+-sdk.
+At line:1 char:1
++ backend\venv\Scripts\pyt
+hon -c "import vertexai; 
+from vertexai.genera ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (C  
+  :\Users\eric\R...i-ve   
+ rtexai-sdk.:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+  warning_logs.show_deprec
+ation_warning()
+Traceback (most recent 
+call last):
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\google\api_core\grpc_h
+elpers.py", line 75, in 
+error_remapped_callable
+    return 
+callable_(*args, **kwargs)
+           
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\grpc\_interceptor.py",
+ line 276, in __call__
+    response, 
+ignored_call = 
+self._with_call(
+                          
+   ^^^^^^^^^^^^^^^^
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\grpc\_interceptor.py",
+ line 331, in _with_call
+    return call.result(), 
+call
+           ^^^^^^^^^^^^^
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\grpc\_channel.py", 
+line 438, in result
+    raise self
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\grpc\_interceptor.py",
+ line 314, in continuation
+    response, call = self.
+_thunk(new_method).with_ca
+ll(
+                     ^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\grpc\_channel.py", 
+line 1180, in with_call
+    return _end_unary_resp
+onse_blocking(state, 
+call, True, None)
+           ^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\grpc\_channel.py", 
+line 996, in _end_unary_re
+sponse_blocking
+    raise 
+_InactiveRpcError(state)  
+# pytype: 
+disable=not-instantiable
+    ^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^
+grpc._channel._InactiveRpc
+Error: <_InactiveRpcError 
+of RPC that terminated 
+with:
+	status = 
+StatusCode.NOT_FOUND
+	details = "Publisher 
+Model `projects/lecla-dash
+board/locations/us-central
+1/publishers/google/models
+/gemini-1.5-flash` was 
+not found or your project 
+does not have access to 
+it. Please ensure you are 
+using a valid model 
+version. For more 
+information, see: https://
+cloud.google.com/vertex-ai
+/generative-ai/docs/learn/
+model-versions"
+	debug_error_string = 
+"UNKNOWN:Error received 
+from peer ipv6:%5B2607:f8b
+0:4006:804::200a%5D:443 
+{grpc_message:"Publisher 
+Model `projects/lecla-dash
+board/locations/us-central
+1/publishers/google/models
+/gemini-1.5-flash` was 
+not found or your project 
+does not have access to 
+it. Please ensure you are 
+using a valid model 
+version. For more 
+information, see: https://
+cloud.google.com/vertex-ai
+/generative-ai/docs/learn/
+model-versions", 
+grpc_status:5}"
+>
+
+The above exception was 
+the direct cause of the 
+following exception:
+
+Traceback (most recent 
+call last):
+  File "<string>", line 
+1, in <module>
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\vertexai\generative_mo
+dels\_generative_models.py
+", line 710, in 
+generate_content
+    return 
+self._generate_content(
+           
+^^^^^^^^^^^^^^^^^^^^^^^
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\vertexai\generative_mo
+dels\_generative_models.py
+", line 833, in 
+_generate_content
+    gapic_response = self.
+_prediction_client.generat
+e_content(request=request)
+                     ^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\google\cloud\aiplatfor
+m_v1\services\prediction_s
+ervice\client.py", line 
+2320, in generate_content
+    response = rpc(
+               ^^^^
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\google\api_core\gapic_
+v1\method.py", line 131, 
+in __call__
+    return 
+wrapped_func(*args, 
+**kwargs)
+           ^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
+  File 
+"C:\Users\eric\React 
+Projects\Lecla Dashboard\b
+ackend\venv\Lib\site-packa
+ges\google\api_core\grpc_h
+elpers.py", line 77, in 
+error_remapped_callable
+    raise exceptions.from_
+grpc_error(exc) from exc
+google.api_core.exceptions
+.NotFound: 404 Publisher 
+Model `projects/lecla-dash
+board/locations/us-central
+1/publishers/google/models
+/gemini-1.5-flash` was 
+not found or your project 
+does not have access to 
+it. Please ensure you are 
+using a valid model 
+version. For more 
+information, see: https://
+cloud.google.com/vertex-ai
+/generative-ai/docs/learn/
+model-versions

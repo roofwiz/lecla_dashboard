@@ -1,43 +1,55 @@
 import React, { useEffect, useState } from 'react';
-import { fetchJobs, fetchProjects, fetchCalendar } from '../services/api';
+import { fetchCRMJobs, fetchProjects, fetchCalendar } from '../services/api';
+import { JobNimbusIcon } from '../components/JobNimbusButton';
+import MapWidget from '../components/MapWidget';
 
 function Dashboard() {
     const [jobs, setJobs] = useState([]);
     const [projects, setProjects] = useState([]);
     const [events, setEvents] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState({
+        jobs: true,
+        projects: true,
+        calendar: true
+    });
 
     useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            try {
-                // Parallel fetching
-                const [jobsData, projectsData, calendarData] = await Promise.allSettled([
-                    fetchJobs(),
-                    fetchProjects(),
-                    fetchCalendar()
-                ]);
+        console.log("Dashboard: Component mounted, starting independent data fetches...");
 
-                if (jobsData.status === 'fulfilled') {
-                    setJobs(jobsData.value.results || (Array.isArray(jobsData.value) ? jobsData.value : []));
-                }
+        // Fetch Jobs
+        fetchCRMJobs().then(data => {
+            console.log("Dashboard: Jobs loaded");
+            const result = Array.isArray(data) ? data : (data?.results || []);
+            setJobs(result);
+            setLoading(prev => ({ ...prev, jobs: false }));
+        }).catch(err => {
+            console.error("Dashboard: Error fetching jobs", err);
+            setJobs([]);
+            setLoading(prev => ({ ...prev, jobs: false }));
+        });
 
-                if (projectsData.status === 'fulfilled') {
-                    setProjects(projectsData.value || []);
-                }
+        // Fetch Projects
+        fetchProjects().then(data => {
+            console.log("Dashboard: Projects loaded");
+            setProjects(Array.isArray(data) ? data : []);
+            setLoading(prev => ({ ...prev, projects: false }));
+        }).catch(err => {
+            console.error("Dashboard: Error fetching projects", err);
+            setProjects([]);
+            setLoading(prev => ({ ...prev, projects: false }));
+        });
 
-                if (calendarData.status === 'fulfilled') {
-                    setEvents(calendarData.value || []);
-                }
+        // Fetch Calendar
+        fetchCalendar().then(data => {
+            console.log("Dashboard: Calendar loaded");
+            setEvents(Array.isArray(data) ? data : []);
+            setLoading(prev => ({ ...prev, calendar: false }));
+        }).catch(err => {
+            console.error("Dashboard: Error fetching calendar", err);
+            setEvents([]);
+            setLoading(prev => ({ ...prev, calendar: false }));
+        });
 
-            } catch (err) {
-                console.warn("Failed to load dashboard data", err);
-                // Continue rendering whatever loaded
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadData();
     }, []);
 
     // Helper to format date
@@ -50,46 +62,52 @@ function Dashboard() {
 
     return (
         <div className="dashboard-grid">
-            <div className="card welcome-card">
+            <div className="card welcome-card" style={{ gridColumn: 'span 3' }}>
                 <h2>Welcome Back, Lecla Team! 👋</h2>
-                <p>Here's what's happening today.</p>
+                <p>Here's what's happening today. You have {projects.length} active projects and {jobs.length} jobs in your pipeline.</p>
             </div>
 
             <div className="card stat-card">
                 <h3>Active Jobs</h3>
                 <div className="stat-value">
-                    {loading ? "..." : jobs.length}
+                    {loading.jobs ? "..." : jobs.length}
                 </div>
                 <span className="stat-trend positive">
-                    {loading ? "Syncing..." : "Synced with JobNimbus"}
+                    {loading.jobs ? "Syncing..." : "Independent CRM"}
                 </span>
             </div>
 
             <div className="card stat-card">
                 <h3>Upcoming Events</h3>
-                <div className="stat-value">{loading ? "..." : events.length}</div>
+                <div className="stat-value">{loading.calendar ? "..." : events.length}</div>
                 <span className="stat-trend neutral">Next 7 Days</span>
             </div>
 
             <div className="card stat-card">
                 <h3>Active Projects</h3>
-                <div className="stat-value">{loading ? "..." : projects.length}</div>
+                <div className="stat-value">{loading.projects ? "..." : projects.length}</div>
                 <span className="stat-trend positive">CompanyCam</span>
             </div>
 
             <div className="card recent-activity">
-                <h3>Job Nimbus Jobs</h3>
+                <h3>Lecla CRM Jobs</h3>
                 <ul>
                     {jobs.slice(0, 5).map((job, index) => (
-                        <li key={job.jnid || index}>
-                            <strong>{job.name || job.number || "Unnamed Job"}</strong>
-                            <span className="status-badge" style={{ marginLeft: '8px', fontSize: '0.7em', padding: '2px 6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>
-                                {job.status_name || "Pending"}
-                            </span>
+                        <li key={job.lecla_id || index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ flex: 1 }}>
+                                <strong>{job.name || job.number || "Unnamed Job"}</strong>
+                                <span className="status-badge" style={{ marginLeft: '8px', fontSize: '0.7em', padding: '2px 6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>
+                                    {job.status_name || "Pending"}
+                                </span>
+                            </div>
+                            <JobNimbusIcon type="job" id={job.jnid} title={job.name} />
                         </li>
                     ))}
-                    {jobs.length === 0 && !loading && (
+                    {jobs.length === 0 && !loading.jobs && (
                         <li>No jobs found.</li>
+                    )}
+                    {loading.jobs && (
+                        <li>Loading jobs...</li>
                     )}
                 </ul>
             </div>
@@ -106,8 +124,11 @@ function Dashboard() {
                             </span>
                         </li>
                     ))}
-                    {projects.length === 0 && !loading && (
+                    {projects.length === 0 && !loading.projects && (
                         <li>No projects found.</li>
+                    )}
+                    {loading.projects && (
+                        <li>Loading projects...</li>
                     )}
                 </ul>
             </div>
@@ -124,8 +145,11 @@ function Dashboard() {
                             </span>
                         </li>
                     ))}
-                    {events.length === 0 && !loading && (
+                    {events.length === 0 && !loading.calendar && (
                         <li>No upcoming events.</li>
+                    )}
+                    {loading.calendar && (
+                        <li>Loading events...</li>
                     )}
                 </ul>
             </div>

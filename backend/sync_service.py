@@ -185,7 +185,33 @@ async def run_smart_sync():
                 if rel.get('type') == 'job':
                     needed_job_ids.add(rel.get('id'))
 
-    # 5. Sync Targeted Jobs
+    # 5. Calculate better Job Totals from related data
+    logger.info("Step 5: Updating Job Totals from Budgets/Invoices/Estimates")
+    with get_db() as conn:
+        c = conn.cursor()
+        # Update jobs where total is 0 or low, using the max of related financials
+        # We join with budgets, estimates, and invoices to find the best representative total
+        update_query = """
+        UPDATE jobs
+        SET total = (
+            SELECT MAX(val) FROM (
+                SELECT revenue as val FROM budgets WHERE related_job_id = jobs.jnid
+                UNION ALL
+                SELECT total as val FROM estimates WHERE related_job_id = jobs.jnid
+                UNION ALL
+                SELECT total as val FROM invoices WHERE related_job_id = jobs.jnid
+                UNION ALL
+                SELECT total as val FROM (SELECT total FROM jobs j2 WHERE j2.jnid = jobs.jnid)
+            )
+        )
+        WHERE total IS NULL OR total <= 0
+        """
+        c.execute(update_query)
+        affected = c.rowcount
+        conn.commit()
+    logger.info(f"Updated totals for {affected} jobs.")
+
+    # 6. Sync Targeted Jobs
     if needed_job_ids:
         await sync_jobs_targeted(needed_job_ids)
     else:

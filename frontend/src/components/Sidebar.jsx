@@ -1,17 +1,34 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { logout, user } = useAuth();
 
     // Helper to check active class
     const isActive = (path) => location.pathname === path ? 'active' : '';
 
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
     return (
         <aside className="sidebar">
             <div className="logo-container">
-                <h2 className="brand-logo">LECLA<span className="brand-dot">.</span></h2>
-                <p className="brand-sub">Home & Roofing</p>
+                <img
+                    src="/lecla-logo.png"
+                    alt="Lecla Home & Roofing"
+                    className="brand-logo-img"
+                    style={{
+                        width: '180px',
+                        height: 'auto',
+                        marginBottom: '8px',
+                        filter: 'brightness(1.1)'
+                    }}
+                />
             </div>
 
             <nav className="nav-menu">
@@ -23,25 +40,50 @@ const Sidebar = () => {
                     <span className="icon">📊</span>
                     <span className="label">Sales Reports</span>
                 </Link>
-                <a href="#" className="nav-item">
+                <Link to="/contacts" className={`nav-item ${isActive('/contacts')}`}>
+                    <span className="icon">👥</span>
+                    <span className="label">Contacts</span>
+                </Link>
+                <Link to="/jobs" className={`nav-item ${isActive('/jobs')}`}>
                     <span className="icon">🔨</span>
                     <span className="label">Jobs</span>
-                </a>
-                <a href="#" className="nav-item">
+                </Link>
+                <Link to="/directory" className={`nav-item ${isActive('/directory')}`}>
+                    <span className="icon">📂</span>
+                    <span className="label">Directory</span>
+                </Link>
+                <Link to="/photos" className={`nav-item ${isActive('/photos')}`}>
                     <span className="icon">📷</span>
                     <span className="label">Photos</span>
-                </a>
-                <a href="#" className="nav-item">
+                </Link>
+                <Link to="/schedule" className={`nav-item ${isActive('/schedule')}`}>
                     <span className="icon">📅</span>
                     <span className="label">Schedule</span>
-                </a>
+                </Link>
+                <Link to="/audit" className={`nav-item ${isActive('/audit')}`}>
+                    <span className="icon">🔍</span>
+                    <span className="label">Data Quality</span>
+                </Link>
             </nav>
 
             <div className="nav-footer">
-                <a href="#" className="nav-item">
+                <div className="user-profile">
+                    <div className="user-text">
+                        <span className="user-name">{user?.full_name}</span>
+                        <span className="user-role">{user?.role}</span>
+                    </div>
+                </div>
+                <button
+                    onClick={handleLogout}
+                    className="logout-btn"
+                >
+                    <span className="icon">🔒</span>
+                    <span className="label">Log Out</span>
+                </button>
+                <Link to="/settings" className={`nav-item ${isActive('/settings')}`}>
                     <span className="icon">⚙️</span>
                     <span className="label">Settings</span>
-                </a>
+                </Link>
             </div>
         </aside>
     );

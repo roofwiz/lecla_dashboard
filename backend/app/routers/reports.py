@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException
-from backend.app.config import settings
-from backend.app.services.jobnimbus import jn_client
+from fastapi import APIRouter, HTTPException, Depends
+from backend.app.database import get_db as get_sqlalchemy_db
+from backend.app.models import Job, Budget
+from sqlalchemy.orm import Session
+from sqlalchemy import func
 from datetime import datetime
 import logging
 
@@ -25,117 +27,95 @@ SALES_STATUSES = [
 CLOSED_STATUSES = ['Paid & Closed', 'Job Completed']
 
 @router.get("/sales-by-rep")
-async def get_sales_by_rep(year: int = 2025):
+async def get_sales_by_rep(year: int = 2025, db: Session = Depends(get_sqlalchemy_db)):
     """
-    Generate Sales Report from JobNimbus Data (Safe & Optimized).
+    Generate Sales Report from local database (SQLAlchemy).
+    Uses estimate signed date to determine which year a sale belongs to.
     """
     try:
-        if not year: 
-            year = datetime.now().year
-        
+        startTime = int(datetime(year, 1, 1).timestamp())
+        endTime = int(datetime(year + 1, 1, 1).timestamp())
         company_goal = COMPANY_GOALS.get(year, 10000000)
+        
+        # Pull budgets for this year (budget date is most accurate for sales)
+        budgets = db.query(Budget).filter(
+            Budget.date_updated >= startTime, 
+            Budget.date_updated < endTime
+        ).all()
+        
         stats = {}
         total_revenue = 0.0
-        total_leads = 0
-        total_closed = 0
-        valid_rows = 0
         
-        # Unix Timestamps for Year filtering
-        start_ts = datetime(year, 1, 1).timestamp()
-        end_ts = datetime(year + 1, 1, 1).timestamp()
+        for budget in budgets:
+            # Get sales rep from budget
+            rep = budget.sales_rep or "Unknown"
+            rev = budget.revenue or 0.0
+            stats[rep] = stats.get(rep, 0.0) + rev
+            total_revenue += rev
+            
+        # Pull job stats (based on budget date)
+        total_leads = db.query(func.count(Job.lecla_id)).join(
+            Budget, Job.jnid == Budget.related_job_id
+        ).filter(
+            Budget.date_updated >= startTime,
+            Budget.date_updated < endTime
+        ).scalar() or 0
         
-        limit = 1000
-        skip = 0
-        stop_fetching = False
-        last_first_id = None
+        total_closed = db.query(func.count(Job.lecla_id)).join(
+            Budget, Job.jnid == Budget.related_job_id
+        ).filter(
+            Budget.date_updated >= startTime,
+            Budget.date_updated < endTime,
+            Job.status_name.in_(CLOSED_STATUSES)
+        ).scalar() or 0
         
-        logger.info(f"Generating safe report for year {year}")
-
-        while not stop_fetching:
-            logger.info(f"Fetching JN Jobs: skip={skip}")
-            jobs_page = await jn_client.get_jobs_simple(limit=limit, skip=skip)
-            
-            if not jobs_page:
-                break
-                
-            # DUPLICATE DETECTION:
-            # JobNimbus API V1 often ignores 'skip/offset' on the /jobs endpoint.
-            # If we see the same first result twice, we are stuck in an infinite loop.
-            current_first_id = jobs_page[0].get('jnid')
-            if last_first_id and current_first_id == last_first_id:
-                logger.warning(f"Detected duplicate results at skip {skip}. API likely does not support paging. Stopping.")
-                break
-            last_first_id = current_first_id
-            
-            page_in_range = False
-            for job in jobs_page:
-                created_ts = job.get('date_created', 0)
-                
-                # Check if within range
-                if start_ts <= created_ts < end_ts:
-                    page_in_range = True
-                    total_leads += 1
-                    status = job.get('status_name', '') or ''
-                    sales_rep = job.get('sales_rep_name', 'Unknown')
-                    
-                    budget = job.get('last_budget_revenue', 0)
-                    inv = job.get('approved_invoice_total', 0)
-                    est = job.get('last_estimate', 0)
-                    
-                    def safe_float(x):
-                        try:
-                            if x is None: return 0.0
-                            return float(x)
-                        except:
-                            return 0.0
-                            
-                    revenue = max(safe_float(budget), safe_float(inv), safe_float(est))
-                    
-                    # Sale check
-                    is_sale_status = any(s.lower() in status.lower() for s in SALES_STATUSES)
-                    if is_sale_status and revenue > 0:
-                        if sales_rep not in stats: stats[sales_rep] = 0.0
-                        stats[sales_rep] += revenue
-                        total_revenue += revenue
-                        valid_rows += 1
-                        
-                    # Closed check
-                    is_closed = any(s.lower() in status.lower() for s in CLOSED_STATUSES)
-                    if is_closed:
-                        total_closed += 1
-                elif created_ts < start_ts:
-                    # If we find a job OLDER than our start point, and assuming DESC order, we can stop.
-                    # But only if we were actually IN the range already or if first job of the account is older.
-                    if skip > 0 or len(jobs_page) < limit:
-                        # Optimization: we hit the end of the year's data
-                        pass
-            
-            # Since pagination might be broken, we'll only try once if we don't have a working filter.
-            # But we increment skip anyway in case it DOES work.
-            skip += len(jobs_page)
-            if len(jobs_page) < limit:
-                stop_fetching = True
-            
-            # Absolute limit to prevent server hung/timeout in case of weirdness
-            if skip > 5000: break
-
         # Format results
-        sorted_stats = [{"name": rep, "value": total} for rep, total in stats.items() if rep]
+        sorted_stats = [{"name": rep, "value": round(total, 2)} for rep, total in stats.items() if rep]
         sorted_stats.sort(key=lambda x: x['value'], reverse=True)
         
         return {
             "year": year,
             "goal": company_goal,
-            "total_revenue": total_revenue,
+            "total_revenue": round(total_revenue, 2),
             "total_leads": total_leads,
             "total_closed": total_closed,
             "results": sorted_stats,
-            "count": valid_rows,
-            "note": "Data limited by API pagination constraints" if skip >= 1000 and last_first_id else None
+            "count": len(budgets)
         }
 
     except Exception as e:
         logger.error(f"Error generating report: {e}")
-        import traceback
-        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/jobs-by-rep/{rep_name}")
+async def get_jobs_by_rep(rep_name: str, year: int = 2025, db: Session = Depends(get_sqlalchemy_db)):
+    """
+    Get all jobs for a specific sales rep for drill-down from reports.
+    """
+    try:
+        startTime = int(datetime(year, 1, 1).timestamp())
+        endTime = int(datetime(year + 1, 1, 1).timestamp())
+        
+        # Get jobs with budgets for this sales rep
+        jobs = db.query(Job).join(
+            Budget, Job.jnid == Budget.related_job_id
+        ).filter(
+            Budget.sales_rep == rep_name,
+            Budget.date_updated >= startTime,
+            Budget.date_updated < endTime
+        ).order_by(Job.date_updated.desc()).all()
+        
+        # Format for frontend
+        return [{
+            "jnid": job.jnid,
+            "number": job.number,
+            "name": job.name,
+            "status_name": job.status_name,
+            "total": job.total,
+            "date_created": job.date_created,
+            "sales_rep": rep_name
+        } for job in jobs]
+        
+    except Exception as e:
+        logger.error(f"Error fetching jobs for rep {rep_name}: {e}")
         raise HTTPException(status_code=500, detail=str(e))

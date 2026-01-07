@@ -1,0 +1,43 @@
+﻿backend\venv\Scripts\
+python : 
+C:\Users\eric\React 
+Projects\Lecla Dashbo
+ard\backend\venv\Lib\
+site-packages\vertexa
+i\generative_models\_
+generative_models.py:
+433: UserWarning: 
+This feature is 
+deprecated as of 
+June 24, 2025 and 
+will be removed on 
+June 24, 2026. For 
+details, see https://
+cloud.google.com/vert
+ex-ai/generative-ai/d
+ocs/deprecations/gena
+i-vertexai-sdk.
+At line:1 char:1
++ backend\venv\Script
+s\python -c "import 
+vertexai; from 
+vertexai.genera ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (C:\User   
+ s\eric\R...i-ver    
+texai-sdk.:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+  warning_logs.show_d
+eprecation_warning()
+Hi there! How can I help you today?
+

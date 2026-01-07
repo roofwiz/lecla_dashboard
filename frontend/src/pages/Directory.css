@@ -1,0 +1,122 @@
+.directory-container {
+    padding: 20px;
+}
+
+.directory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.search-bar input {
+    padding: 12px 20px;
+    width: 350px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.directory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.staff-card {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.staff-card:hover {
+    transform: translateY(-5px);
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.staff-category {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    font-size: 0.65rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.staff-category[data-cat="Admin"] {
+    background: rgba(78, 115, 223, 0.15);
+    color: #4e73df;
+}
+
+.staff-category[data-cat="Sales"] {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.staff-category[data-cat="Production"] {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}
+
+.staff-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.staff-title {
+    font-size: 0.9rem;
+    color: var(--color-accent);
+    margin-bottom: 20px;
+}
+
+.staff-details {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 16px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.detail-item a {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.detail-item a:hover {
+    color: white;
+}
+
+.detail-focus {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+.no-results {
+    text-align: center;
+    padding: 100px;
+    color: #64748b;
+}

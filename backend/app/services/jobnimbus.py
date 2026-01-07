@@ -37,6 +37,7 @@ class JobNimbusClient:
         all_jobs = []
         limit = 1000
         skip = 0
+        last_first_id = None
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             while True:
@@ -57,10 +58,22 @@ class JobNimbusClient:
                     
                     if not results:
                         break
+                    
+                    # Duplicate Detection: If first ID is same as last page's first ID, API is looping
+                    current_first_id = results[0].get('jnid')
+                    if last_first_id and current_first_id == last_first_id:
+                        logger.warning(f"Detected duplicate results at skip {skip}. API likely does not support paging. Stopping.")
+                        break
+                    last_first_id = current_first_id
                         
                     all_jobs.extend(results)
                     skip += len(results)
                     
+                    # Safety Break
+                    if skip > 15000:
+                        logger.warning("Safety limit of 15,000 jobs reached. Stopping sync.")
+                        break
+                        
                     if len(results) < limit:
                         break
                         
@@ -147,5 +160,25 @@ class JobNimbusClient:
             except Exception as e:
                 logger.error(f"Exception fetching job {job_id}: {e}")
                 return None
+
+    async def fetch_all_contacts(self, limit: int = 5000):
+        """Fetch ALL contacts (assuming count < 5000)."""
+        url = f"{self.base_url}/contacts?limit={limit}"
+        logger.info(f"Fetching JN Contacts (limit={limit})")
+        
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            try:
+                resp = await client.get(url, headers=self.headers)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if isinstance(data, dict) and 'results' in data:
+                        return data['results']
+                    elif isinstance(data, list):
+                        return data
+                else:
+                    logger.error(f"JN API Error (Contacts): {resp.text}")
+            except Exception as e:
+                logger.error(f"JN Exception (Contacts): {e}")
+        return []
 
 jn_client = JobNimbusClient()

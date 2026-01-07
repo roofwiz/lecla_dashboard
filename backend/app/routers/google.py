@@ -11,12 +11,23 @@ def get_google_creds():
     token_path = settings.GOOGLE_TOKEN_PICKLE
     
     if token_path.exists():
-        with open(token_path, 'rb') as token:
-            creds = pickle.load(token)
+        try:
+            with open(token_path, 'rb') as token:
+                creds = pickle.load(token)
+        except Exception as e:
+            print(f"Error loading google tokens: {e}")
+            raise HTTPException(status_code=500, detail="Could not load Google tokens")
             
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            try:
+                # This is a blocking network call. 
+                # Since this function is called inside synchronous route handlers, 
+                # FastAPI will run them in a thread pool, which is fine.
+                creds.refresh(Request())
+            except Exception as e:
+                print(f"Error refreshing google tokens: {e}")
+                raise HTTPException(status_code=401, detail=f"Google token refresh failed: {str(e)}")
         else:
              raise HTTPException(status_code=401, detail="Google Not Authorized. Server needs to re-authenticate.")
     return creds
